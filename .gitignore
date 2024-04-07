@@ -19,6 +19,7 @@ staticfiles/
 
 # Archivos de cache
 __pycache__/
+**/migrations/
 
 # Archivos de configuración específicos del entorno (puedes tener diferentes para desarrollo, producción, etc.)
 .env
