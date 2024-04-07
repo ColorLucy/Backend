@@ -4,13 +4,13 @@ from corsheaders import middleware
 import environ
 import os
 
-"""
+
 env = environ.Env(
     DEBUG=(bool, False)
 )
 
 environ.Env.read_env()
-"""
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -86,15 +86,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# luego se implementan variables de entorno
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'kdHbDULooiwaZjlbxIqXqvsFojUWCMyk',
-        'HOST': 'roundhouse.proxy.rlwy.net',
-        'PORT': '27498',
+        'ENGINE': env('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': env('DB_NAME', default='railway'),
+        'USER': env('DB_USER', default='postgres'),
+        'PASSWORD': env('DB_PASSWORD', default=''),
+        'HOST': env('DB_HOST', default='localhost'),
+        'PORT': env('DB_PORT', default='5432'),
     }
 }
 
