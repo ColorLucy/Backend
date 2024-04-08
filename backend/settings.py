@@ -9,13 +9,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-"""
+
 env = environ.Env(
     DEBUG=(bool, False)
 )
 
 environ.Env.read_env()
-"""
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -56,8 +56,10 @@ TEMPLATES = [{'BACKEND': 'django.template.backends.django.DjangoTemplates', 'DIR
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+
 # luego se implementan variables de entorno
 DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
