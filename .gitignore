@@ -2,7 +2,7 @@
 venv/
 env/
 *.pyc
-
+*.env
 # Archivos de configuración local
 *.sqlite3
 *.log
@@ -22,7 +22,7 @@ __pycache__/
 **/migrations/
 
 # Archivos de configuración específicos del entorno (puedes tener diferentes para desarrollo, producción, etc.)
-.env
+backend/.env
 
 # Dependencias de terceros
 /lib/python3.*/site-packages/
