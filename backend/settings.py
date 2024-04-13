@@ -6,16 +6,14 @@ import dj_database_url
 import environ
 from corsheaders import middleware
 from dotenv import load_dotenv
+
 load_dotenv()
-
-
 
 env = environ.Env(
     DEBUG=(bool, False)
 )
 
 environ.Env.read_env()
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,8 +23,6 @@ SECRET_KEY = 'django-insecure-%2$vr3yiaj%yr!x#g_j4%h^o%$xyfd_7$atdfgnb48&jgzc2^%
 DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "*"]
-
-# Application definition
 
 INSTALLED_APPS = [
     # 'django.contrib.admin',
@@ -56,17 +52,15 @@ TEMPLATES = [{'BACKEND': 'django.template.backends.django.DjangoTemplates', 'DIR
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
 # luego se implementan variables de entorno
 DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(seconds=90),
     'REFRESH_TOKEN_LIFETIME': timedelta(hours=8),
-  }
+}
 AUTH_PASSWORD_VALIDATORS = [{'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
                             {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
                             {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },

@@ -35,6 +35,7 @@ class UserLoginAPIView(APIView):
 
 class UserRegisterAPIView(APIView):
     permission_classes = [IsAdminUser]
+
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
