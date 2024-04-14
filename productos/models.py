@@ -29,3 +29,12 @@ class Detalle(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+class Imagen(models.Model):
+    id_imagen = models.IntegerField(primary_key=True, unique=True)
+    URL = models.URLField()
+    id_detalle = models.ForeignKey(Detalle, on_delete=models.CASCADE, db_column="id_detalle")
+
+    def __str__(self):
+        return self.id_imagen
