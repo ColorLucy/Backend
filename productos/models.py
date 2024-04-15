@@ -18,6 +18,7 @@ class Producto(models.Model):
     def __str__(self):
         return self.descripcion
     
+
 class Detalle(models.Model):
     id_detalle = models.AutoField(primary_key=True, unique=True)
     nombre = models.CharField(max_length=100)
@@ -33,4 +34,4 @@ class Detalle(models.Model):
 class Imagen(models.Model):
     id_imagen = models.AutoField(primary_key=True, unique=True)
     url = models.CharField(max_length=250)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    detalle = models.ForeignKey(Detalle, on_delete=models.CASCADE)

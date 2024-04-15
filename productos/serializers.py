@@ -7,19 +7,16 @@ class CategoriaSerializer(ModelSerializer):
         model = Categoria
         fields = '__all__'
 
+class DetalleSerializer(ModelSerializer):
+    class Meta:
+        model = Detalle
+        fields = ['nombre', 'precio', 'unidad', 'color', 'producto']
+
 
 class ImagenSerializer(ModelSerializer):
     class Meta:
         model = Imagen
         fields = '__all__'
-
-
-class DetalleSerializer(ModelSerializer):
-    #id_imagen1 = ImagenSerializer()
-    
-    class Meta:
-        model = Detalle
-        fields = ['nombre', 'precio', 'unidad', 'color', 'producto']
 
 
 class ProductoSerializer(ModelSerializer):

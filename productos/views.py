@@ -13,13 +13,13 @@ class ProductCreateAPIView(APIView):
     def post(self, request):
         product_data = request.data.get('producto', {})
         details_data = request.data.pop('detalles', [])
-
-        #categoria_obj = get_object_or_404(Categoria, pk=category_data.get('id_categoria'))
+        images_data = request.data.pop('imagenes', [])
 
         product_serializer = ProductoSerializer(data=product_data)
 
         if product_serializer.is_valid():
             product_instance = product_serializer.save()
+            detail_instance = None
 
             print(product_instance)
             for detail in details_data:
@@ -31,6 +31,18 @@ class ProductCreateAPIView(APIView):
                 else:
                     errors = {
                         **detail_serializer.errors,
+                    }
+                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        
+            for img in images_data:
+                img['detalle'] = detail_instance.pk
+                img_serializer = ImagenSerializer(data=img)
+                if img_serializer.is_valid():
+                    img_instance = img_serializer.save(detalle=detail_instance)
+                    print(img_instance)
+                else:
+                    errors = {
+                        **img_serializer.errors,
                     }
                     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -102,7 +114,7 @@ class CategoryCreateAPIView(APIView):
 class CategoryListAPIView(APIView):
     def get(self, request):
         categories = Categoria.objects.all()
-        serializer = ProductoSerializer(categories, many=True)
+        serializer = CategoriaSerializer(categories, many=True)
         return Response(serializer.data)
     
 # category: get, update, delete
@@ -142,9 +154,8 @@ class CategoryDetailAPIView(APIView):
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-'''
-# DETAILS
 
+# DETAILS
 # create detail
 class DetailCreateAPIView(APIView):
     def post(self, request):
@@ -162,7 +173,7 @@ class DetailListAPIView(APIView):
         return Response(serializer.data)
     
 # detail: get, update, delete
-class CategoryDetailAPIView(APIView):
+class RudDetailAPIView(APIView):
     def get_object(self, pk):
         try:
             return Detalle.objects.get(pk=pk)
@@ -196,4 +207,4 @@ class CategoryDetailAPIView(APIView):
         pk = self.get_pk(request)
         detail = self.get_object(pk)
         detail.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)'''
+        return Response(status=status.HTTP_204_NO_CONTENT)
