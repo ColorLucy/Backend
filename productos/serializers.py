@@ -1,26 +1,28 @@
-from rest_framework import serializers
-from .models import Categoria, Producto, Detalle, Imagen
+from django import forms
+from rest_framework.serializers import ModelSerializer
+from .models import Producto, Detalle, Categoria, Imagen
 
 
-class CategoriaSerializer(serializers.ModelSerializer):
+class CategoriaSerializer(ModelSerializer):
     class Meta:
         model = Categoria
         fields = '__all__'
 
 
-class ProductoSerializer(serializers.ModelSerializer):
+class ImagenSerializer(ModelSerializer):
+    class Meta:
+        model = Imagen
+        fields = '__all__'
+
+
+class DetalleSerializer(ModelSerializer):
+    class Meta:
+        model = Detalle
+        fields = ['nombre', 'precio', 'unidad', 'color', 'producto']
+
+
+class ProductoSerializer(ModelSerializer):
     class Meta:
         model = Producto
         fields = '__all__'
 
-
-class DetalleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Detalle
-        fields = '__all__'
-
-
-class ImagenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Imagen
-        fields = '__all__'
