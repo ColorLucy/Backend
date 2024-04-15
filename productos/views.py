@@ -1,14 +1,14 @@
 from django.http import HttpResponse
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
+from rest_framework.exceptions import NotFound
 
 
-# create product
+# Product views
 class ProductCreateAPIView(APIView):
     def post(self, request):
         product_data = request.data.get('producto', {})
@@ -17,21 +17,17 @@ class ProductCreateAPIView(APIView):
 
         product_serializer = ProductoSerializer(data=product_data)
 
-        if product_serializer.is_valid():
-            product_instance = product_serializer.save()
-            detail_instance = None
+        if not product_serializer.is_valid():
+            return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            for detail in details_data:
-                detail['producto'] = product_instance.pk
-                detail_serializer = DetalleSerializer(data=detail)
-                if detail_serializer.is_valid():
-                    detail_instance = detail_serializer.save(producto=product_instance)
-                else:
-                    errors = {
-                        **detail_serializer.errors,
-                    }
-                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        product_instance = product_serializer.save()
 
+        for detail in details_data:
+            detail['producto'] = product_instance.pk
+            detail_serializer = DetalleSerializer(data=detail)
+            if not detail_serializer.is_valid():
+                return Response(detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            detail_instance = detail_serializer.save(producto=product_instance)
             for img in images_data:
                 img['detalle'] = detail_instance.pk
                 img_serializer = ImagenSerializer(data=img)
@@ -39,19 +35,11 @@ class ProductCreateAPIView(APIView):
                     img_instance = img_serializer.save(detalle=detail_instance)
                     print(img_instance)
                 else:
-                    errors = {
-                        **img_serializer.errors,
-                    }
-                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(img_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(product_serializer.data, status=status.HTTP_201_CREATED)
-        errors = {
-            **product_serializer.errors,
-        }
-        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(product_serializer.data, status=status.HTTP_201_CREATED)
 
 
-# view all products
 class ProductListAPIView(APIView):
     def get(self, request):
         products = Producto.objects.all()
@@ -59,13 +47,12 @@ class ProductListAPIView(APIView):
         return Response(serializer.data)
 
 
-# product: get, update, delete
 class ProductDetailAPIView(APIView):
     def get_object(self, pk):
         try:
             return Producto.objects.get(pk=pk)
         except Producto.DoesNotExist:
-            return None
+            raise NotFound(detail='Product not found', code=status.HTTP_404_NOT_FOUND)
 
     def get_pk(self, request):
         pk = request.query_params.get('pk')
@@ -84,11 +71,14 @@ class ProductDetailAPIView(APIView):
     def put(self, request):
         pk = self.get_pk(request)
         product = self.get_object(pk)
-        serializer = ProductoSerializer(product, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if product:
+            serializer = ProductoSerializer(product, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request):
         pk = self.get_pk(request)
@@ -97,12 +87,9 @@ class ProductDetailAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# CATEGORIES
-
-# create category
+# Category views
 class CategoryCreateAPIView(APIView):
     def post(self, request):
-        print(request.data)
         serializer = CategoriaSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -110,7 +97,6 @@ class CategoryCreateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# view all categories
 class CategoryListAPIView(APIView):
     def get(self, request):
         categories = Categoria.objects.all()
@@ -118,13 +104,12 @@ class CategoryListAPIView(APIView):
         return Response(serializer.data)
 
 
-# category: get, update, delete
 class CategoryDetailAPIView(APIView):
     def get_object(self, pk):
         try:
             return Categoria.objects.get(pk=pk)
         except Categoria.DoesNotExist:
-            return None
+            raise NotFound(detail='Category not found', code=status.HTTP_404_NOT_FOUND)
 
     def get_pk(self, request):
         pk = request.query_params.get('pk')
@@ -137,19 +122,20 @@ class CategoryDetailAPIView(APIView):
         category = self.get_object(pk)
         if category is None:
             return Response({'error': 'category not found'}, status=status.HTTP_404_NOT_FOUND)
-        # serializer = CategoriaSerializer(category)
-        # return Response(serializer.data)
         category_name = category.nombre
         return Response({'nombre': category_name})
 
     def put(self, request):
         pk = self.get_pk(request)
         category = self.get_object(pk)
-        serializer = CategoriaSerializer(category, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if category:
+            serializer = CategoriaSerializer(category, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request):
         pk = self.get_pk(request)
@@ -158,6 +144,7 @@ class CategoryDetailAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# Detail views
 class DetailCreateAPIView(APIView):
     def post(self, request):
         serializer = DetalleSerializer(data=request.data)
@@ -167,7 +154,6 @@ class DetailCreateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# view all details
 class DetailListAPIView(APIView):
     def get(self, request):
         details = Detalle.objects.all()
@@ -180,7 +166,7 @@ class RudDetailAPIView(APIView):
         try:
             return Detalle.objects.get(pk=pk)
         except Detalle.DoesNotExist:
-            return None
+            raise NotFound(detail='Detail not found', code=status.HTTP_404_NOT_FOUND)
 
     def get_pk(self, request):
         pk = request.query_params.get('pk')
@@ -199,16 +185,18 @@ class RudDetailAPIView(APIView):
     def put(self, request):
         pk = self.get_pk(request)
         detail = self.get_object(pk)
-        serializer = DetalleSerializer(detail, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
+        if detail:
+            serializer = DetalleSerializer(detail, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Detail not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request):
-        pk = self.get_pk(request)
-        detail = self.get_object(pk)
-        detail.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
+def delete(self, request):
+    pk = self.get_pk(request)
+    detail = self.get_object(pk)
+    detail.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
