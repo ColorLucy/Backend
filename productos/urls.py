@@ -3,13 +3,15 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import *
 
-# urlpatterns = [
-#     path('productos/', views.ProductoListView.as_view(), name='producto-list'),
-#     path('productos/<int:pk>/', views.ProductoDetailView.as_view(), name='producto-detail'),
-#     path('productos/<int:pk>/update/', views.ProductoUpdateView.as_view(), name='producto-update'),
-#     path('productos/<int:pk>/delete/', views.ProductoDeleteView.as_view(), name='producto-delete'),
-#     path('productos/create/', views.ProductoCreateView.as_view(), name='producto-create'),
-# ]
+# 1
+# # urlpatterns = [
+# #     path('productos/', views.ProductoListView.as_view(), name='producto-list'),
+# #     path('productos/<int:pk>/', views.ProductoDetailView.as_view(), name='producto-detail'),
+# #     path('productos/<int:pk>/update/', views.ProductoUpdateView.as_view(), name='producto-update'),
+# #     path('productos/<int:pk>/delete/', views.ProductoDeleteView.as_view(), name='producto-delete'),
+# #     path('productos/create/', views.ProductoCreateView.as_view(), name='producto-create'),
+# # ]
+
 
 urlpatterns = [
     path("refresh/", TokenRefreshView.as_view(), name='token_refresh'),

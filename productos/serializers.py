@@ -1,4 +1,3 @@
-from django import forms
 from rest_framework.serializers import ModelSerializer
 from .models import Producto, Detalle, Categoria, Imagen
 
