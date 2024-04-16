@@ -6,36 +6,43 @@ from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
 from rest_framework.exceptions import NotFound
+from rest_framework.pagination import PageNumberPagination
 
 
 # Product views
 class ProductCreateAPIView(APIView):
     def post(self, request):
-        product_data = request.data.get('producto', {})
-        details_data = request.data.pop('detalles', [])
-        images_data = request.data.pop('imagenes', [])
+        product_data = request.data.get("producto", {})
+        details_data = request.data.pop("detalles", [])
+        images_data = request.data.pop("imagenes", [])
 
         product_serializer = ProductoSerializer(data=product_data)
 
         if not product_serializer.is_valid():
-            return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                product_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
         product_instance = product_serializer.save()
 
         for detail in details_data:
-            detail['producto'] = product_instance.pk
+            detail["producto"] = product_instance.pk
             detail_serializer = DetalleSerializer(data=detail)
             if not detail_serializer.is_valid():
-                return Response(detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
             detail_instance = detail_serializer.save(producto=product_instance)
             for img in images_data:
-                img['detalle'] = detail_instance.pk
+                img["detalle"] = detail_instance.pk
                 img_serializer = ImagenSerializer(data=img)
                 if img_serializer.is_valid():
                     img_instance = img_serializer.save(detalle=detail_instance)
                     print(img_instance)
                 else:
-                    return Response(img_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        img_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
 
         return Response(product_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -56,19 +63,24 @@ class ProductDetailAPIView(APIView):
         try:
             return Producto.objects.get(pk=pk)
         except Producto.DoesNotExist:
-            raise NotFound(detail='Product not found', code=status.HTTP_404_NOT_FOUND)
+            raise NotFound(detail="Product not found", code=status.HTTP_404_NOT_FOUND)
 
     def get_pk(self, request):
-        pk = request.query_params.get('pk')
+        pk = request.query_params.get("pk")
         if pk is None:
-            raise Response({'error': 'without "pk" in request params'}, status=status.HTTP_400_BAD_REQUEST)
+            raise Response(
+                {"error": 'without "pk" in request params'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return pk
 
     def get(self, request):
         pk = self.get_pk(request)
         product = self.get_object(pk)
         if product is None:
-            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+            )
         serializer = ProductoSerializer(product)
         return Response(serializer.data)
 
@@ -82,7 +94,9 @@ class ProductDetailAPIView(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     def delete(self, request):
         pk = self.get_pk(request)
@@ -113,21 +127,26 @@ class CategoryDetailAPIView(APIView):
         try:
             return Categoria.objects.get(pk=pk)
         except Categoria.DoesNotExist:
-            raise NotFound(detail='Category not found', code=status.HTTP_404_NOT_FOUND)
+            raise NotFound(detail="Category not found", code=status.HTTP_404_NOT_FOUND)
 
     def get_pk(self, request):
-        pk = request.query_params.get('pk')
+        pk = request.query_params.get("pk")
         if pk is None:
-            raise Response({'error': 'without "pk" in request params'}, status=status.HTTP_400_BAD_REQUEST)
+            raise Response(
+                {"error": 'without "pk" in request params'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return pk
 
     def get(self, request):
         pk = self.get_pk(request)
         category = self.get_object(pk)
         if category is None:
-            return Response({'error': 'category not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "category not found"}, status=status.HTTP_404_NOT_FOUND
+            )
         category_name = category.nombre
-        return Response({'nombre': category_name})
+        return Response({"nombre": category_name})
 
     def put(self, request):
         pk = self.get_pk(request)
@@ -139,7 +158,9 @@ class CategoryDetailAPIView(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     def delete(self, request):
         pk = self.get_pk(request)
@@ -165,24 +186,48 @@ class DetailListAPIView(APIView):
         return Response(serializer.data)
 
 
+# Experimental APIView, may be useful in the future or not
+class DetailPaginatedListAPIView(APIView):
+    def get(self, request):
+        details = Detalle.objects.all()
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        details_page = paginator.paginate_queryset(details, request)
+        serializer = DetalleSerializer(details_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
+# Experimental APIView, may be useful in the future or not
+class DetailImageListAPIView(APIView):
+    def get(self, request):
+        details = Imagen.objects.all()
+        serializer = DetalleImagenSerializer(details, many=True)
+        return Response(serializer.data)
+
+
 class RudDetailAPIView(APIView):
     def get_object(self, pk):
         try:
             return Detalle.objects.get(pk=pk)
         except Detalle.DoesNotExist:
-            raise NotFound(detail='Detail not found', code=status.HTTP_404_NOT_FOUND)
+            raise NotFound(detail="Detail not found", code=status.HTTP_404_NOT_FOUND)
 
     def get_pk(self, request):
-        pk = request.query_params.get('pk')
+        pk = request.query_params.get("pk")
         if pk is None:
-            raise Response({'error': 'without "pk" in request params'}, status=status.HTTP_400_BAD_REQUEST)
+            raise Response(
+                {"error": 'without "pk" in request params'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return pk
 
     def get(self, request):
         pk = self.get_pk(request)
         detail = self.get_object(pk)
         if detail is None:
-            return Response({'error': 'detail not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "detail not found"}, status=status.HTTP_404_NOT_FOUND
+            )
         serializer = DetalleSerializer(detail)
         return Response(serializer.data)
 
@@ -196,7 +241,9 @@ class RudDetailAPIView(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'error': 'Detail not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Detail not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 def delete(self, request):
