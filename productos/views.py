@@ -58,6 +58,16 @@ class DetalleProductoApi(APIView):
         detalle = Detalle.objects.all()[:10]
         serializer = DetalleProductoSerializer(detalle, many=True)
         return Response(serializer.data)
+    
+class DetallesPorCategoriaAPIView(APIView):
+    serializer_class = DetalleProductoSerializer
+
+    def get(self, request, *args, **kwargs):
+        categoria_id = kwargs['categoria_id']
+        detalles = Detalle.objects.filter(producto__categoria_id=categoria_id)
+        serializer = self.serializer_class(detalles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 class ProductDetailAPIView(APIView):
     def get_object(self, pk):
         try:
