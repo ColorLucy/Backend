@@ -14,17 +14,28 @@ from .views import *
 
 
 urlpatterns = [
-    path("refresh/", TokenRefreshView.as_view(), name='token_refresh'),
-
-    path("create-category/", CategoryCreateAPIView.as_view(), name='create_category'),
+    path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("create-category/", CategoryCreateAPIView.as_view(), name="create_category"),
     path("view-categories/", CategoryListAPIView.as_view(), name="view_categories"),
     path("rud-category/", CategoryDetailAPIView.as_view(), name="rud_category"),
-
-    path("create-product/", ProductCreateAPIView.as_view(), name='create_product'),
+    path("create-product/", ProductCreateAPIView.as_view(), name="create_product"),
     path("view-products/", ProductListAPIView.as_view(), name="view_products"),
-    path("rud-product/", ProductDetailAPIView.as_view(), name="rud_product"),  # TODO put
-
+    path(
+        "rud-product/", ProductDetailAPIView.as_view(), name="rud_product"
+    ),  # TODO put
     path("create-detail/", DetailCreateAPIView.as_view(), name="create_detail"),
     path("view-details/", DetailListAPIView.as_view(), name="view_details"),
-    path("rud-detail/", RudDetailAPIView.as_view(), name="rud_detail")
+    path(
+        # Experimental
+        "view-image-details/",
+        DetailImageListAPIView.as_view(),
+        name="view_image_details",
+    ),
+    path(
+        # Experimental
+        "view-sliced-details/",
+        DetailPaginatedListAPIView.as_view(),
+        name="view_sliced_details",
+    ),
+    path("rud-detail/", RudDetailAPIView.as_view(), name="rud_detail"),
 ]

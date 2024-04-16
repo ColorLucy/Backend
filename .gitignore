@@ -1,6 +1,7 @@
 # Entornos virtuales (por ejemplo, creado con virtualenv o pipenv)
 venv/
 env/
+.venv/
 *.pyc
 *.env
 # Archivos de configuración local
@@ -10,6 +11,9 @@ env/
 *.pyo
 *.bak
 *.swp
+
+# Archivos CSV
+data/
 
 # Archivos de migraciones de la base de datos
 */migrations/*.py
