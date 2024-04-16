@@ -26,5 +26,7 @@ urlpatterns = [
 
     path("create-detail/", DetailCreateAPIView.as_view(), name="create_detail"),
     path("view-details/", DetailListAPIView.as_view(), name="view_details"),
-    path("rud-detail/", RudDetailAPIView.as_view(), name="rud_detail")
+    path("rud-detail/", RudDetailAPIView.as_view(), name="rud_detail"),
+
+    path("view-details-products/", DetalleProductoApi.as_view(), name="view_details_products"),
 ]
