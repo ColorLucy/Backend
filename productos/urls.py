@@ -25,6 +25,11 @@ urlpatterns = [
     ),  # TODO put
     path("create-detail/", DetailCreateAPIView.as_view(), name="create_detail"),
     path("view-details/", DetailListAPIView.as_view(), name="view_details"),
+
+    path("rud-detail/", RudDetailAPIView.as_view(), name="rud_detail"),
+
+    path("view-details-products/", DetalleProductoApi.as_view(), name="view_details_products"),
+
     path(
         # Experimental
         "view-image-details/",
@@ -37,5 +42,6 @@ urlpatterns = [
         DetailPaginatedListAPIView.as_view(),
         name="view_sliced_details",
     ),
-    path("rud-detail/", RudDetailAPIView.as_view(), name="rud_detail"),
+
+
 ]

@@ -53,7 +53,7 @@ class Detalle(models.Model):
 class Imagen(models.Model):
     id_imagen = models.AutoField(primary_key=True)
     url = models.URLField()
-    detalle = models.ForeignKey(Detalle, on_delete=models.CASCADE, db_column="id_detalle")
+    detalle = models.ForeignKey(Detalle, on_delete=models.CASCADE, db_column="id_detalle", related_name="imagenes")
 
     def save(self, *args, **kwargs):
         if not self.id_imagen:
