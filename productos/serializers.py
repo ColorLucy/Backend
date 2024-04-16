@@ -1,11 +1,11 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, StringRelatedField
 from .models import Producto, Detalle, Categoria, Imagen
 
 
 class CategoriaSerializer(ModelSerializer):
     class Meta:
         model = Categoria
-        fields = '__all__'
+        fields = ["url"]
 
 
 class ImagenSerializer(ModelSerializer):
@@ -25,3 +25,10 @@ class ProductoSerializer(ModelSerializer):
         model = Producto
         fields = '__all__'
 
+
+class DetalleProductoSerializer(ModelSerializer):
+    producto = ProductoSerializer(many=False)
+    imagenes = StringRelatedField(many=True, read_only=True)
+    class Meta:
+        model = Detalle
+        fields = ['nombre', 'precio', 'unidad', 'color', 'producto', "imagenes"]

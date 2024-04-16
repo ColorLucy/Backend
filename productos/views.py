@@ -46,7 +46,11 @@ class ProductListAPIView(APIView):
         serializer = ProductoSerializer(products, many=True)
         return Response(serializer.data)
 
-
+class DetalleProductoApi(APIView):
+    def get(self, request):
+        detalle = Detalle.objects.all()
+        serializer = DetalleProductoSerializer(detalle, many=True)
+        return Response(serializer.data)
 class ProductDetailAPIView(APIView):
     def get_object(self, pk):
         try:
