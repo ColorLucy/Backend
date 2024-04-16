@@ -5,7 +5,7 @@ from .models import Producto, Detalle, Categoria, Imagen
 class CategoriaSerializer(ModelSerializer):
     class Meta:
         model = Categoria
-        fields = ["url", "id_imagen"]
+        fields = "__all__"
 
 
 
@@ -18,7 +18,7 @@ class ImagenSerializer(ModelSerializer):
 class DetalleSerializer(ModelSerializer):
     class Meta:
         model = Detalle
-        fields = "__all__"
+        fields = ['nombre', 'precio', 'unidad', 'color', 'producto']
 
 
 # Experimental Serializer, may be useful in the future or not

@@ -43,5 +43,7 @@ urlpatterns = [
         name="view_sliced_details",
     ),
 
+    path('detalles-por-categoria/<int:categoria_id>/', DetallesPorCategoriaAPIView.as_view(), name='detalles_por_categoria'),
+
 
 ]
