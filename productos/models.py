@@ -30,7 +30,7 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.descripcion
-
+    
 
 class Detalle(models.Model):
     id_detalle = models.AutoField(primary_key=True)
