@@ -39,7 +39,6 @@ class ProductCreateAPIView(APIView):
                 img_serializer = ImagenSerializer(data=img)
                 if img_serializer.is_valid():
                     img_instance = img_serializer.save(detalle=detail_instance)
-                    print(img_instance)
                 else:
                     return Response(
                         img_serializer.errors, status=status.HTTP_400_BAD_REQUEST
@@ -72,7 +71,7 @@ class ProductGetAllAPIView(APIView):
             "details": detail_serializer.data,
             "images": image_serializer.data,
         }
-        print(data)
+
         return Response(data, status=status.HTTP_200_OK)
     
 class ProductUpdateAPIView(APIView):
@@ -171,7 +170,7 @@ class ProductDeleteAPIView(APIView):
 
 class ProductListAPIView(APIView):
     def get(self, request):
-        products = Producto.objects.all()
+        products = Producto.objects.all()[:25]
         serializer = ProductoDetalleImagenSerializer(products, many=True)
         return Response(serializer.data)
     
