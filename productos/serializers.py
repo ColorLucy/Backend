@@ -9,7 +9,6 @@ class CategoriaSerializer(ModelSerializer):
         fields = "__all__"
 
 
-
 class ImagenSerializer(ModelSerializer):
     class Meta:
         model = Imagen
@@ -34,12 +33,13 @@ class DetalleImagenSerializer(ModelSerializer):
 class ProductoSerializer(ModelSerializer):
     class Meta:
         model = Producto
-        fields = '__all__'
+        fields = ['id_producto', 'nombre', 'fabricante', 'descripcion', 'categoria']
 
 
 class DetalleProductoSerializer(ModelSerializer):
     producto = ProductoSerializer(many=False)
     imagenes = StringRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Detalle
         fields = ['nombre', 'precio', 'unidad', 'color', 'producto', "imagenes"]
@@ -60,5 +60,6 @@ class ProductoDetalleImagenSerializer(serializers.ModelSerializer):
             imagenes_queryset = Imagen.objects.filter(detalle_id=detalle['id_detalle'])
             imagenes_data = ImagenSerializer(imagenes_queryset, many=True).data
             detalle['imagenes'] = imagenes_data
-        
+
         return detalles_data
+

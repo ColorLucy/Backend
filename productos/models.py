@@ -18,6 +18,7 @@ class Categoria(models.Model):
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=200)
     fabricante = models.CharField(max_length=100)
     descripcion = models.TextField(null=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, db_column="id_categoria")
@@ -63,3 +64,4 @@ class Imagen(models.Model):
 
     def __str__(self):
         return self.url
+

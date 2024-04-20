@@ -8,20 +8,24 @@ from .serializers import *
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 
+
 class ProductListAPIView(APIView):
     def get(self, request):
-        products = Producto.objects.all()[:25]
-        serializer = ProductoDetalleImagenSerializer(products, many=True)
+        products = Producto.objects.all()
+        serializer = ProductoSerializer(products, many=True)
         return Response(serializer.data)
-    
-class DetalleProductoApi(APIView):
+
+
+class DetalleProductoAPIView(APIView):
     def get(self, request):
         detalle = Detalle.objects.all()[:10]
         serializer = DetalleProductoSerializer(detalle, many=True)
         return Response(serializer.data)
 
+
 class DetallesPorCategoriaAPIView(APIView):
     serializer_class = DetalleProductoSerializer
+
 
 # Category views
 class CategoryCreateAPIView(APIView):
@@ -31,6 +35,7 @@ class CategoryCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CategoryListAPIView(APIView):
     def get(self, request):
@@ -95,11 +100,13 @@ class DetailCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class DetailListAPIView(APIView):
     def get(self, request):
         details = Detalle.objects.all()
         serializer = DetalleSerializer(details, many=True)
         return Response(serializer.data)
+
 
 # Experimental APIView, may be useful in the future or not
 class DetailPaginatedListAPIView(APIView):
@@ -111,12 +118,14 @@ class DetailPaginatedListAPIView(APIView):
         serializer = DetalleSerializer(details_page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
+
 # Experimental APIView, may be useful in the future or not
 class DetailImageListAPIView(APIView):
     def get(self, request):
         details = Imagen.objects.all()
         serializer = DetalleImagenSerializer(details, many=True)
         return Response(serializer.data)
+
 
 class RudDetailAPIView(APIView):
     def get_object(self, pk):
@@ -163,3 +172,4 @@ class RudDetailAPIView(APIView):
         detail = self.get_object(pk)
         detail.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
