@@ -19,7 +19,7 @@ class ImagenSerializer(ModelSerializer):
 class DetalleSerializer(ModelSerializer):
     class Meta:
         model = Detalle
-        fields = "__all___"
+        fields = "__all__"
 
 
 # Experimental Serializer, may be useful in the future or not
@@ -34,7 +34,6 @@ class DetalleImagenSerializer(ModelSerializer):
 class ProductoSerializer(ModelSerializer):
     class Meta:
         model = Producto
-
         fields = '__all__'
 
 

@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import *
+from .views_crud import *
 
 # 1
 # # urlpatterns = [
