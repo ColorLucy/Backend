@@ -10,7 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 
 class ProductListAPIView(APIView):
     def get(self, request):
-        products = Producto.objects.all()
+        products = Producto.objects.all()[:25]
         serializer = ProductoDetalleImagenSerializer(products, many=True)
         return Response(serializer.data)
     
