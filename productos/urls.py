@@ -38,5 +38,7 @@ urlpatterns = [
     path('detalles-por-categoria/<int:categoria_id>/', DetallesPorCategoriaAPIView.as_view(),
          name='detalles_por_categoria'),
 
+    path('search/', ProductSearchAPIView.as_view(), name='product-search'),
+
 ]
 

@@ -172,4 +172,14 @@ class RudDetailAPIView(APIView):
         detail = self.get_object(pk)
         detail.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class ProductSearchAPIView(APIView):
+    def get(self, request):
+        search_term = request.query_params.get('q', '')
+        if search_term:
+            detalle = Detalle.objects.filter(nombre__icontains=search_term)
+            serializer = DetalleProductoSerializer(detalle, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response("No se proporcionó un término de búsqueda", status=status.HTTP_400_BAD_REQUEST)
 
