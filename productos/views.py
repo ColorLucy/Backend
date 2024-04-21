@@ -22,7 +22,11 @@ class DetalleProductoAPIView(APIView):
         serializer = DetalleProductoSerializer(detalle, many=True)
         return Response(serializer.data)
 
-
+class ProductoDetalleAPIView(APIView):
+    def get(self, request):
+        producto = Producto.objects.all()[:10]
+        serializer = ProductoDetalleImagenSerializer(producto, many=True)
+        return Response(serializer.data)
 class DetallesPorCategoriaAPIView(APIView):
     serializer_class = DetalleProductoSerializer
 
