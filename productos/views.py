@@ -7,7 +7,7 @@ from .models import *
 from .serializers import *
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
-
+from django.shortcuts import get_object_or_404
 
 class ProductListAPIView(APIView):
     def get(self, request):
@@ -22,7 +22,7 @@ class DetalleProductoAPIView(APIView):
         serializer = DetalleProductoSerializer(detalle, many=True)
         return Response(serializer.data)
 
-class ProductoDetalleAPIView(APIView):
+class ProductosDetalleAPIView(APIView):
     def get(self, request):
         productos = Producto.objects.all()
         paginator = PageNumberPagination()
@@ -30,12 +30,19 @@ class ProductoDetalleAPIView(APIView):
         productos_paginados = paginator.paginate_queryset(productos, request)
         serializer = ProductoDetalleImagenSerializer(productos_paginados, many=True)
         return paginator.get_paginated_response(serializer.data)
+class ProductoDetalleAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        producto_id = kwargs.get('producto_id')
+        producto = get_object_or_404(Producto, pk=producto_id)
+        serializer = ProductoDetalleImagenSerializer(producto, many=False)
+        return serializer.data
 
 class DetallesPorCategoriaAPIView(APIView):
     serializer_class = ProductoDetalleImagenSerializer
 
     def get(self, request, *args, **kwargs):
         categoria_id = kwargs.get('categoria_id')  #
+        categoria = get_object_or_404(Categoria, pk=categoria_id)
         if categoria_id is None:
             return Response({"message": "El ID de la categoría es necesario"}, status=status.HTTP_400_BAD_REQUEST)
 
