@@ -35,7 +35,7 @@ class DetallesPorCategoriaAPIView(APIView):
     serializer_class = ProductoDetalleImagenSerializer
 
     def get(self, request, *args, **kwargs):
-        categoria_id = kwargs.get('categoria_id')  #
+        categoria_id = kwargs.get('categoria_id')  
         if categoria_id is None:
             return Response({"message": "El ID de la categoría es necesario"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,14 +191,20 @@ class RudDetailAPIView(APIView):
         detail = self.get_object(pk)
         detail.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
 class ProductSearchAPIView(APIView):
     def get(self, request):
         search_term = request.query_params.get('q', '')
         if search_term:
-            detalle = Detalle.objects.filter(nombre__icontains=search_term)
-            serializer = DetalleProductoSerializer(detalle, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            detalles = Producto.objects.filter(nombre__icontains=search_term)
+            paginator = PageNumberPagination()
+            paginator.page_size = 20
+            detalles_paginados = paginator.paginate_queryset(detalles, request)
+            serializer = ProductoDetalleImagenSerializer(detalles_paginados, many=True)
+            return paginator.get_paginated_response(serializer.data)
         else:
             return Response("No se proporcionó un término de búsqueda", status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
