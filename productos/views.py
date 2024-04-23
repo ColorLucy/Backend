@@ -35,7 +35,7 @@ class ProductoDetalleAPIView(APIView):
         producto_id = kwargs.get('producto_id')
         producto = get_object_or_404(Producto, pk=producto_id)
         serializer = ProductoDetalleImagenSerializer(producto, many=False)
-        return serializer.data
+        return Response(serializer.data)
 
 class DetallesPorCategoriaAPIView(APIView):
     serializer_class = ProductoDetalleImagenSerializer
@@ -46,10 +46,10 @@ class DetallesPorCategoriaAPIView(APIView):
         if categoria_id is None:
             return Response({"message": "El ID de la categoría es necesario"}, status=status.HTTP_400_BAD_REQUEST)
 
-        detalles = Producto.objects.filter(categoria_id=categoria_id)
+        productos = Producto.objects.filter(categoria_id=categoria_id)
         paginator = PageNumberPagination()
         paginator.page_size = 20
-        detalles_paginados = paginator.paginate_queryset(detalles, request)
+        detalles_paginados = paginator.paginate_queryset(productos, request)
         serializer = self.serializer_class(detalles_paginados, many=True)
         return paginator.get_paginated_response(serializer.data)
 
