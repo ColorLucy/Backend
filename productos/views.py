@@ -42,7 +42,7 @@ class DetallesPorCategoriaAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         categoria_id = kwargs.get('categoria_id')  #
-        categoria = get_object_or_404(Categoria, pk=categoria_id)
+        #categoria = get_object_or_404(Categoria, pk=categoria_id)
         if categoria_id is None:
             return Response({"message": "El ID de la categoría es necesario"}, status=status.HTTP_400_BAD_REQUEST)
 
