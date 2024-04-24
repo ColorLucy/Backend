@@ -5,7 +5,6 @@ from .views import *
 from .views_crud import *
 
 urlpatterns = [
-    path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("create-category/", CategoryCreateAPIView.as_view(), name="create_category"),
     path("view-categories/", CategoryListAPIView.as_view(), name="view_categories"),
     path("rud-category/", CategoryDetailAPIView.as_view(), name="rud_category"),
@@ -21,7 +20,8 @@ urlpatterns = [
     path("rud-detail/", RudDetailAPIView.as_view(), name="rud_detail"),
 
     path("view-details-products/", DetalleProductoAPIView.as_view(), name="view_details_products"),
-    path("product-details/", ProductoDetalleAPIView.as_view(), name="view_products_details"),
+    path("product-details/<int:producto_id>/", ProductoDetalleAPIView.as_view(), name="view_product_details"),
+    path("product-details/", ProductosDetalleAPIView.as_view(), name="view_products_details"),
     path(
         # Experimental
         "view-image-details/",
@@ -41,4 +41,3 @@ urlpatterns = [
     path('search/', ProductSearchAPIView.as_view(), name='product-search'),
 
 ]
-
