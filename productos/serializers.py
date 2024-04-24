@@ -47,6 +47,7 @@ class DetalleProductoSerializer(ModelSerializer):
 
 class ProductoDetalleImagenSerializer(serializers.ModelSerializer):
     detalles = serializers.SerializerMethodField()
+    categoria = CategoriaSerializer(many=False)
 
     class Meta:
         model = Producto
