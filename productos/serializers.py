@@ -12,7 +12,7 @@ class CategoriaSerializer(ModelSerializer):
 class ImagenSerializer(ModelSerializer):
     class Meta:
         model = Imagen
-        fields = ["url"]
+        fields = "__all__"
 
 
 class DetalleSerializer(ModelSerializer):
