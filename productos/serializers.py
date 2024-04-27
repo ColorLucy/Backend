@@ -51,7 +51,7 @@ class ProductoDetalleImagenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Producto
-        fields = ('id_producto', 'fabricante', 'descripcion', 'categoria', 'detalles')
+        fields = ('id_producto', 'fabricante', 'descripcion', 'categoria', 'detalles', 'nombre')
 
     def get_detalles(self, obj):
         detalles_queryset = Detalle.objects.filter(producto=obj)
