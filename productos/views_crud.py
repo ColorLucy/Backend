@@ -64,7 +64,6 @@ class ProductGetAllAPIView(APIView):
             "details": detail_serializer.data,
             "images": image_serializer.data,
         }
-        print(data)
         return Response(data, status=status.HTTP_200_OK)
     
 class ProductUpdateAPIView(APIView):
@@ -86,10 +85,8 @@ class ProductUpdateAPIView(APIView):
         images_data = request.data.pop('imagenes', [])
         product_serializer = ProductoSerializer(instance=product_instance, data=product_data)
         if product_serializer.is_valid():
-            # update product data
             updated_product = product_serializer.save()
 
-            # update details data
             for detail in details_data:
                 detail['producto'] = product_instance.pk
                 detail_id = detail.get('id_detalle')
@@ -107,7 +104,6 @@ class ProductUpdateAPIView(APIView):
                 else:
                     return Response(detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            # delete and add images
             with transaction.atomic():
                 existing_image_ids = list(Imagen.objects.filter(detalle__producto=product_instance).values_list('pk', flat=True))
                 updated_image_ids = []
@@ -126,7 +122,7 @@ class ProductUpdateAPIView(APIView):
                         else:
                             return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                     else:
-                        img_data['detalle'] = updated_detail.pk
+                        img_data['detalle'] = img_data.get('detalle')
                         new_image_serializer = ImagenSerializer(data=img_data)
                         if new_image_serializer.is_valid():
                             new_image_serializer.save()
