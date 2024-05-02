@@ -86,11 +86,14 @@ class ProductUpdateAPIView(APIView):
         product_serializer = ProductoSerializer(instance=product_instance, data=product_data)
         if product_serializer.is_valid():
             updated_product = product_serializer.save()
+            existing_detail_ids = list(Detalle.objects.filter(producto=product_instance).values_list('id_detalle', flat=True))
 
             for detail in details_data:
                 detail['producto'] = product_instance.pk
                 detail_id = detail.get('id_detalle')
+                updated_detail_ids = []
                 if detail_id:
+                    updated_detail_ids.append(detail_id)
                     try:
                         detail_instance = Detalle.objects.get(pk=detail_id)
                         detail_serializer = DetalleSerializer(instance=detail_instance, data=detail)
@@ -100,9 +103,11 @@ class ProductUpdateAPIView(APIView):
                     return Response({"error": "id_detalle is required"}, status=status.HTTP_400_BAD_REQUEST)
 
                 if detail_serializer.is_valid():
-                    updated_detail = detail_serializer.save(producto=updated_product)
+                    detail_serializer.save(producto=updated_product)
                 else:
                     return Response(detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            details_to_delete = set(existing_detail_ids) - set(updated_detail_ids)
+            Detalle.objects.filter(pk__in=details_to_delete).delete()
 
             with transaction.atomic():
                 existing_image_ids = list(Imagen.objects.filter(detalle__producto=product_instance).values_list('pk', flat=True))
