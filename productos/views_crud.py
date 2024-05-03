@@ -87,11 +87,11 @@ class ProductUpdateAPIView(APIView):
         if product_serializer.is_valid():
             updated_product = product_serializer.save()
             existing_detail_ids = list(Detalle.objects.filter(producto=product_instance).values_list('id_detalle', flat=True))
+            updated_detail_ids = []
 
             for detail in details_data:
                 detail['producto'] = product_instance.pk
                 detail_id = detail.get('id_detalle')
-                updated_detail_ids = []
                 if detail_id:
                     updated_detail_ids.append(detail_id)
                     try:
