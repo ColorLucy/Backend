@@ -4,11 +4,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
-from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
 
 
 class ProductCreateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         product_data = request.data.get("producto", {})
         details_data = request.data.pop("detalles", [])
@@ -32,8 +32,7 @@ class ProductCreateAPIView(APIView):
                 img["detalle"] = detail_instance.pk
                 img_serializer = ImagenSerializer(data=img)
                 if img_serializer.is_valid():
-                    img_instance = img_serializer.save(detalle=detail_instance)
-                    print(img_instance)
+                    img_serializer.save(detalle=detail_instance)
                 else:
                     return Response(
                         img_serializer.errors, status=status.HTTP_400_BAD_REQUEST
@@ -41,6 +40,7 @@ class ProductCreateAPIView(APIView):
         return Response(product_serializer.data, status=status.HTTP_201_CREATED)
 
 class ProductGetAllAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -64,10 +64,10 @@ class ProductGetAllAPIView(APIView):
             "details": detail_serializer.data,
             "images": image_serializer.data,
         }
-        print(data)
         return Response(data, status=status.HTTP_200_OK)
     
 class ProductUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -86,33 +86,36 @@ class ProductUpdateAPIView(APIView):
         images_data = request.data.pop('imagenes', [])
         product_serializer = ProductoSerializer(instance=product_instance, data=product_data)
         if product_serializer.is_valid():
-            # update product data
             updated_product = product_serializer.save()
+            existing_detail_ids = list(Detalle.objects.filter(producto=product_instance).values_list('id_detalle', flat=True))
+            updated_detail_ids = []
 
-            # update details data
             for detail in details_data:
-                detail['producto'] = product_instance.pk
                 detail_id = detail.get('id_detalle')
                 if detail_id:
+                    updated_detail_ids.append(detail_id)
                     try:
                         detail_instance = Detalle.objects.get(pk=detail_id)
                         detail_serializer = DetalleSerializer(instance=detail_instance, data=detail)
                     except Detalle.DoesNotExist:
                         return Response({"error": f"Detail with ID {detail_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
                 else:
-                    return Response({"error": "id_detalle is required"}, status=status.HTTP_400_BAD_REQUEST)
+                    detail_serializer = DetalleSerializer(data=detail)
 
                 if detail_serializer.is_valid():
-                    updated_detail = detail_serializer.save(producto=updated_product)
+                    new_detail = detail_serializer.save(producto=updated_product)
                 else:
                     return Response(detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            details_to_delete = set(existing_detail_ids) - set(updated_detail_ids)
+            Detalle.objects.filter(pk__in=details_to_delete).delete()
 
-            # delete and add images
             with transaction.atomic():
                 existing_image_ids = list(Imagen.objects.filter(detalle__producto=product_instance).values_list('pk', flat=True))
                 updated_image_ids = []
+
                 for img_data in images_data:
                     image_id = img_data.get('id_imagen')
+                    is_detail_valid = img_data.get('detalle')
                     if image_id:
                         updated_image_ids.append(image_id)
                         try:
@@ -125,13 +128,19 @@ class ProductUpdateAPIView(APIView):
                             image_serializer.save(detalle=image_instance.detalle)
                         else:
                             return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                    else:
-                        img_data['detalle'] = updated_detail.pk
+
+                    elif is_detail_valid != None:
+                        img_data['detalle'] = img_data.get('detalle')
                         new_image_serializer = ImagenSerializer(data=img_data)
                         if new_image_serializer.is_valid():
                             new_image_serializer.save()
-                        else:
-                            return Response(new_image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                    else:
+                        img_data['detalle'] = new_detail.pk
+                        new_image_serializer = ImagenSerializer(data=img_data)
+                        if new_image_serializer.is_valid():
+                            new_image_serializer.save()
+
                 images_to_delete = set(existing_image_ids) - set(updated_image_ids)
                 Imagen.objects.filter(pk__in=images_to_delete).delete()         
             return Response({"message": "Product updated successfully"}, status=status.HTTP_200_OK)
@@ -139,6 +148,7 @@ class ProductUpdateAPIView(APIView):
             return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
