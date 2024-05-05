@@ -4,11 +4,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
-from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
 
 
 class ProductCreateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         product_data = request.data.get("producto", {})
         details_data = request.data.pop("detalles", [])
@@ -40,6 +40,7 @@ class ProductCreateAPIView(APIView):
         return Response(product_serializer.data, status=status.HTTP_201_CREATED)
 
 class ProductGetAllAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -66,6 +67,7 @@ class ProductGetAllAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
     
 class ProductUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -146,6 +148,7 @@ class ProductUpdateAPIView(APIView):
             return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
