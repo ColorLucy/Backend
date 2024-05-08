@@ -27,7 +27,8 @@ class UserManager(BaseUserManager):
 
 
 class UserData(AbstractUser):
-    name = models.CharField(max_length=100)
+    username = None
+    name = models.CharField(max_length=100, default=None)
     email = models.EmailField(max_length=100, unique=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now_add=True, null=True)

@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model, authenticate
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -34,9 +34,20 @@ class UserLoginAPIView(APIView):
 
 
 class UserRegisterAPIView(APIView):
-    permission_classes = [IsAdminUser]
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            if self.request.data.get('is_admin', False):
+                self.permission_classes = [IsAuthenticated]
+            else:
+                self.permission_classes = [AllowAny]
+        return [permission() for permission in self.permission_classes]
 
     def post(self, request, *args, **kwargs):
+        is_admin = request.data.get('is_admin', False)
+        if is_admin:
+            if not request.user.is_admin:
+                return Response({"detail": "No tiene permisos para crear un usuario administrador."},
+                                status=status.HTTP_403_FORBIDDEN)
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
