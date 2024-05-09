@@ -1,8 +1,9 @@
 # Entornos virtuales (por ejemplo, creado con virtualenv o pipenv)
 venv/
 env/
+.venv/
 *.pyc
-
+*.env
 # Archivos de configuración local
 *.sqlite3
 *.log
@@ -10,6 +11,9 @@ env/
 *.pyo
 *.bak
 *.swp
+
+# Archivos CSV
+data/
 
 # Archivos de migraciones de la base de datos
 */migrations/*.py
@@ -22,7 +26,7 @@ __pycache__/
 **/migrations/
 
 # Archivos de configuración específicos del entorno (puedes tener diferentes para desarrollo, producción, etc.)
-.env
+backend/.env
 
 # Dependencias de terceros
 /lib/python3.*/site-packages/
