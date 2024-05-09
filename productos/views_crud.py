@@ -2,18 +2,20 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from .models import *
 from .serializers import *
 from django.db import transaction
 
 
 class ProductCreateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def post(self, request):
         product_data = request.data.get("producto", {})
         details_data = request.data.pop("detalles", [])
         images_data = request.data.pop("imagenes", [])
         product_serializer = ProductoSerializer(data=product_data)
+
         if not product_serializer.is_valid():
             return Response(
                 product_serializer.errors, status=status.HTTP_400_BAD_REQUEST
@@ -40,7 +42,7 @@ class ProductCreateAPIView(APIView):
         return Response(product_serializer.data, status=status.HTTP_201_CREATED)
 
 class ProductGetAllAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -67,7 +69,7 @@ class ProductGetAllAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
     
 class ProductUpdateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -148,7 +150,7 @@ class ProductUpdateAPIView(APIView):
             return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductDeleteAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
