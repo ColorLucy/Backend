@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from .models import *
 from .serializers import *
 from rest_framework.exceptions import NotFound
@@ -43,7 +44,7 @@ class DetallesPorCategoriaAPIView(APIView):
 
 # Category views
 class CategoryCreateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = CategoriaSerializer(data=request.data)
         if serializer.is_valid():
@@ -53,7 +54,7 @@ class CategoryCreateAPIView(APIView):
 
 
 class CategoryDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def get_object(self, pk):
         try:
             return Categoria.objects.get(pk=pk)
