@@ -80,3 +80,15 @@ class ExampleView(APIView):
             'status': 'request was permitted'
         }
         return Response(content)
+class GoogleLoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        user, created = User.objects.get_or_create(email=request.data['email'], name=request.data['name'])
+        refresh = RefreshToken.for_user(user)
+        user = UserSerializer(instance=user)
+        response = {
+            'success': True,
+            "user": user.data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+        return Response(response, status=status.HTTP_201_CREATED) if created else Response(response, status=status.HTTP_200_OK)
