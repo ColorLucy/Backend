@@ -92,3 +92,12 @@ class GoogleLoginView(APIView):
             'access': str(refresh.access_token),
         }
         return Response(response, status=status.HTTP_201_CREATED) if created else Response(response, status=status.HTTP_200_OK)
+    
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        serializer = UserSerializer(instance=user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
