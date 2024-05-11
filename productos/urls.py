@@ -5,8 +5,6 @@ from .views import *
 from .views_crud import *
 
 urlpatterns = [
-    path("refresh/", TokenRefreshView.as_view(), name='token_refresh'),
-
     path("create-category/", CategoryCreateAPIView.as_view(), name="create_category"),
     path("view-categories/", CategoryListAPIView.as_view(), name="view_categories"),
     path("rud-category/", CategoryDetailAPIView.as_view(), name="rud_category"),
