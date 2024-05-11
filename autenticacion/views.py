@@ -2,17 +2,19 @@ from django.contrib.auth import get_user_model, authenticate
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from .serializers import *
 
 User = get_user_model()
 
 
 class UserLoginAPIView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kargs):
         user = authenticate(email=request.data['email'], password=request.data['password'])
         if user is not None:
@@ -37,7 +39,8 @@ class UserRegisterAPIView(APIView):
     def get_permissions(self):
         if self.request.method == 'POST':
             if self.request.data.get('is_admin', False):
-                self.permission_classes = [IsAuthenticated]
+                self.permission_classes = [IsAdminUser]
+                self.authentication_classes = [JWTAuthentication]
             else:
                 self.permission_classes = [AllowAny]
         return [permission() for permission in self.permission_classes]
@@ -65,6 +68,7 @@ class UserRegisterAPIView(APIView):
 
 class UserLogoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request, *args):
         token = Token.objects.get(user=request.user)
@@ -74,12 +78,15 @@ class UserLogoutAPIView(APIView):
 
 class ExampleView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, format=None):
         content = {
             'status': 'request was permitted'
         }
         return Response(content)
+
+
 class GoogleLoginView(APIView):
     def post(self, request, *args, **kwargs):
         user, created = User.objects.get_or_create(email=request.data['email'], name=request.data['name'])
@@ -91,8 +98,8 @@ class GoogleLoginView(APIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
-        return Response(response, status=status.HTTP_201_CREATED) if created else Response(response, status=status.HTTP_200_OK)
-    
+        return Response(response, status=status.HTTP_201_CREATED) if created else Response(response,
+                                                                                           status=status.HTTP_200_OK)
 class UserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -100,4 +107,3 @@ class UserProfileAPIView(APIView):
         user = request.user
         serializer = UserSerializer(instance=user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
