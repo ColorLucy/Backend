@@ -9,8 +9,15 @@ from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 
-
-class ProductListAPIView(APIView):
+class ProductosDetalleAPIView(APIView):
+    def get(self, request):
+        productos = Producto.objects.all()
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+        productos_paginados = paginator.paginate_queryset(productos, request)
+        serializer = ProductoDetalleImagenSerializer(productos_paginados, many=True)
+        return paginator.get_paginated_response(serializer.data)
+class ProductListAPIView(APIView):#eliminar esta
     def get(self, request):
         products = Producto.objects.all()
         serializer = ProductoSerializer(products, many=True)
