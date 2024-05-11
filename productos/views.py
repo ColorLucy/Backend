@@ -26,7 +26,6 @@ class ProductListAPIView(APIView):  # eliminar esta
     serializer_class = ModelSerializer
 
     def get(self, request):
-        print(request.user, request.user.is_staff, request.headers["Authorization"])
         products = Producto.objects.all()
         serializer = ProductoSerializer(products, many=True)
         return Response(serializer.data)
