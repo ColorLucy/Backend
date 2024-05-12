@@ -1,15 +1,15 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
 from .models import *
 from .serializers import *
 from django.db import transaction
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import IsAdminUser
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class ProductCreateAPIView(APIView):
     permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     def post(self, request):
         product_data = request.data.get("producto", {})
         details_data = request.data.pop("detalles", [])
@@ -43,6 +43,7 @@ class ProductCreateAPIView(APIView):
 
 class ProductGetAllAPIView(APIView):
     permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -70,6 +71,7 @@ class ProductGetAllAPIView(APIView):
     
 class ProductUpdateAPIView(APIView):
     permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
@@ -151,6 +153,7 @@ class ProductUpdateAPIView(APIView):
 
 class ProductDeleteAPIView(APIView):
     permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
     def get_pk(self, request):
         pk = request.query_params.get('pk')
         if pk is None:
