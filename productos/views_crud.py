@@ -57,17 +57,8 @@ class ProductGetAllAPIView(APIView):
         except Producto.DoesNotExist:
             return Response({"error": "Product does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        product_serializer = ProductoSerializer(product_instance)
-        details_queryset = Detalle.objects.filter(producto=product_instance)
-        detail_serializer = DetalleSerializer(details_queryset, many=True)
-        images_queryset = Imagen.objects.filter(detalle__in=details_queryset)
-        image_serializer = ImagenSerializer(images_queryset, many=True)
-        data = {
-            "product": product_serializer.data,
-            "details": detail_serializer.data,
-            "images": image_serializer.data,
-        }
-        return Response(data, status=status.HTTP_200_OK)
+        product_serializer = ProductoDetalleImagenSerializer(product_instance)
+        return Response(product_serializer.data, status=status.HTTP_200_OK)
     
 class ProductUpdateAPIView(APIView):
     permission_classes = [IsAdminUser]
