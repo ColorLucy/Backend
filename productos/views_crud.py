@@ -14,16 +14,22 @@ class ProductCreateAPIView(APIView):
         product_data = request.data.get("producto", {})
         details_data = request.data.pop("detalles", [])
         images_data = request.data.pop("imagenes", [])
-        product_serializer = ProductoSerializer(data=product_data)
 
+        if product_data['descripcion'] == "":
+            product_data['descripcion'] = None
+        product_serializer = ProductoSerializer(data=product_data)
         if not product_serializer.is_valid():
+            print("ERROR")
             return Response(
                 product_serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
 
         product_instance = product_serializer.save()
         for detail in details_data:
-            detail["producto"] = product_instance.pk
+            detail['producto'] = product_instance.pk
+
+            if detail['color'] == "":
+                detail['color'] = "NA"
             detail_serializer = DetalleSerializer(data=detail)
             if not detail_serializer.is_valid():
                 return Response(
