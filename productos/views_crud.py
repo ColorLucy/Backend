@@ -15,33 +15,39 @@ class ProductCreateAPIView(APIView):
         details_data = request.data.pop("detalles", [])
         images_data = request.data.pop("imagenes", [])
 
+        #
+        #
+        #
+        #
         if product_data['descripcion'] == "":
             product_data['descripcion'] = None
         product_serializer = ProductoSerializer(data=product_data)
         if not product_serializer.is_valid():
-            print("ERROR")
+            print("producto-------")
             return Response(
                 product_serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
-
         product_instance = product_serializer.save()
+
         for detail in details_data:
             detail['producto'] = product_instance.pk
-
             if detail['color'] == "":
                 detail['color'] = "NA"
             detail_serializer = DetalleSerializer(data=detail)
             if not detail_serializer.is_valid():
+                print("detalle-------")
                 return Response(
                     detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST
                 )
             detail_instance = detail_serializer.save(producto=product_instance)
+
             for img in images_data:
                 img["detalle"] = detail_instance.pk
                 img_serializer = ImagenSerializer(data=img)
                 if img_serializer.is_valid():
                     img_serializer.save(detalle=detail_instance)
                 else:
+                    print("img-----------")
                     return Response(
                         img_serializer.errors, status=status.HTTP_400_BAD_REQUEST
                     )
@@ -85,6 +91,9 @@ class ProductUpdateAPIView(APIView):
         product_data = request.data.get('producto', {})
         details_data = request.data.pop('detalles', [])
         images_data = request.data.pop('imagenes', [])
+
+        if product_data["descripcion"] == "":
+            product_data["descripcion"] = None
         product_serializer = ProductoSerializer(instance=product_instance, data=product_data)
         if product_serializer.is_valid():
             updated_product = product_serializer.save()
@@ -93,6 +102,8 @@ class ProductUpdateAPIView(APIView):
 
             for detail in details_data:
                 detail_id = detail.get('id_detalle')
+                if detail['color'] == "":
+                    detail['color'] = "NA"
                 if detail_id:
                     updated_detail_ids.append(detail_id)
                     try:
@@ -104,6 +115,7 @@ class ProductUpdateAPIView(APIView):
                     detail_serializer = DetalleSerializer(data=detail)
 
                 if detail_serializer.is_valid():
+
                     new_detail = detail_serializer.save(producto=updated_product)
                 else:
                     return Response(detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
