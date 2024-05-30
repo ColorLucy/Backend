@@ -93,8 +93,6 @@ class ProductUpdateAPIView(APIView):
             product_data['descripcion'] = None
 
         details_data = product_data.pop('detalles', None)
-        print(details_data, "detalles", "\n\n")
-        print(product_data, "producto")
 
         product_serializer = ProductoSerializer(instance=product_instance, data=product_data)
         if not product_serializer.is_valid():
@@ -102,21 +100,19 @@ class ProductUpdateAPIView(APIView):
 
         with transaction.atomic():
             updated_product = product_serializer.save()
+            
             existing_detail_ids = list(Detalle.objects.filter(producto=product_instance).values_list('id_detalle', flat=True))
             existing_image_ids = list(Imagen.objects.filter(detalle__producto=product_instance).values_list('pk', flat=True))
             updated_detail_ids = []
             updated_image_ids = []
 
-            print(existing_detail_ids, "\n\n", existing_image_ids)
-
             for detail in details_data:
                 detail_id = detail.get('id_detalle')
                 detail_images = detail.pop('imagenes', [])
-
                 if detail['color'] == "":
                     detail['color'] = "NA"
                 detail['producto'] = updated_product.pk
-                print(detail, "detalle dentro del for \n\n")
+
                 if detail_id:
                     try:
                         detail_instance = Detalle.objects.get(pk=detail_id)
@@ -136,9 +132,7 @@ class ProductUpdateAPIView(APIView):
                 for image in detail_images:
                     image['detalle'] = new_or_updated_detail.pk
                     image_id = image.get('id_imagen')
-                    print(image, "imagen dentro del for de detalle")
                     if image_id:
-                        print("imagen ya existente")
                         try:
                             image_instance = Imagen.objects.get(pk=image_id)
                         except Imagen.DoesNotExist:
@@ -147,18 +141,15 @@ class ProductUpdateAPIView(APIView):
                         image_serializer = ImagenSerializer(instance=image_instance, data=image)
                         updated_image_ids.append(image_id)
                     else:
-                        print("imagen nueva")
                         image_serializer = ImagenSerializer(data=image)
 
                     if not image_serializer.is_valid():
                         return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-                    image_instace = image_serializer.save()
-                    print(image_instace)
+                    image_serializer.save()
 
             images_to_delete = set(existing_image_ids) - set(updated_image_ids)
             Imagen.objects.filter(pk__in=images_to_delete).delete()
-
             details_to_delete = set(existing_detail_ids) - set(updated_detail_ids)
             Detalle.objects.filter(pk__in=details_to_delete).delete()
         return Response({"message": "Product updated successfully"}, status=status.HTTP_200_OK)
