@@ -1,16 +1,30 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
-from .models import *
-from .serializers import *
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
-from django.shortcuts import get_object_or_404
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from .serializers import *
 
 
-class ProductListAPIView(APIView):
+class ProductosDetalleAPIView(APIView):
+    def get(self, request):
+        productos = Producto.objects.all()
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+        productos_paginados = paginator.paginate_queryset(productos, request)
+        serializer = ProductoDetalleImagenSerializer(productos_paginados, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
+class ProductListAPIView(APIView):  # eliminar esta
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = ModelSerializer
+
     def get(self, request):
         products = Producto.objects.all()
         serializer = ProductoSerializer(products, many=True)
@@ -30,7 +44,7 @@ class DetallesPorCategoriaAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         categoria_id = kwargs.get('categoria_id')  #
-        #categoria = get_object_or_404(Categoria, pk=categoria_id)
+        # categoria = get_object_or_404(Categoria, pk=categoria_id)
         if categoria_id is None:
             return Response({"message": "El ID de la categoría es necesario"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -44,7 +58,9 @@ class DetallesPorCategoriaAPIView(APIView):
 
 # Category views
 class CategoryCreateAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+
     def post(self, request):
         serializer = CategoriaSerializer(data=request.data)
         if serializer.is_valid():
@@ -54,7 +70,14 @@ class CategoryCreateAPIView(APIView):
 
 
 class CategoryDetailAPIView(APIView):
-    permission_classes = [AllowAny]
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAdminUser]
+            self.authentication_classes = [JWTAuthentication]
+        return [permission() for permission in self.permission_classes]
+
     def get_object(self, pk):
         try:
             return Categoria.objects.get(pk=pk)
@@ -90,6 +113,7 @@ class CategoryDetailAPIView(APIView):
         category = self.get_object(pk)
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class CategoryListAPIView(APIView):
     def get(self, request):
