@@ -11,46 +11,41 @@ class ProductCreateAPIView(APIView):
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]
     def post(self, request):
-        product_data = request.data.get("producto", {})
-        details_data = request.data.pop("detalles", [])
-        images_data = request.data.pop("imagenes", [])
-        print(product_data)
-        print(details_data)
-        print(images_data)
-
-        if product_data['descripcion'] == "":
+        product_data = request.data
+        product_data['categoria'] = product_data['categoria'].get('id_categoria')
+        if product_data.get('descripcion', "") == "":
             product_data['descripcion'] = None
+
+        details_data = product_data.pop('detalles', None)
+
         product_serializer = ProductoSerializer(data=product_data)
         if not product_serializer.is_valid():
-            print("producto-------")
-            return Response(
-                product_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
-        product_instance = product_serializer.save()
+            return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        for detail in details_data:
-            detail['producto'] = product_instance.pk
-            if detail['color'] == "":
-                detail['color'] = "NA"
-            detail_serializer = DetalleSerializer(data=detail)
-            if not detail_serializer.is_valid():
-                print("detalle-------")
-                return Response(
-                    detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-                )
-            detail_instance = detail_serializer.save(producto=product_instance)
+        with transaction.atomic():
+            new_product = product_serializer.save()
 
-            for img in images_data:
-                img["detalle"] = detail_instance.pk
-                img_serializer = ImagenSerializer(data=img)
-                if img_serializer.is_valid():
-                    img_serializer.save(detalle=detail_instance)
-                else:
-                    print("img-----------")
-                    return Response(
-                        img_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-                    )
-        return Response(product_serializer.data, status=status.HTTP_201_CREATED)
+            for detail in details_data:
+                detail['producto'] = new_product.pk
+                detail_images = detail.pop('imagenes', [])
+                if detail['color'] == "":
+                    detail['color'] = "NA"
+
+                detail_serializer = DetalleSerializer(data=detail)
+                if not detail_serializer.is_valid():
+                    return Response(detail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                new_detail = detail_serializer.save()
+
+                for image in detail_images:
+                    image['detalle'] = new_detail.pk
+                    image_serializer = ImagenSerializer(data=image)
+
+                    if not image_serializer.is_valid():
+                        return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                    image_serializer.save()
+        return Response({"message": "Product created successfully"}, status=status.HTTP_201_CREATED)
 
 class ProductGetAllAPIView(APIView):
     permission_classes = [IsAdminUser]
@@ -100,7 +95,7 @@ class ProductUpdateAPIView(APIView):
 
         with transaction.atomic():
             updated_product = product_serializer.save()
-            
+
             existing_detail_ids = list(Detalle.objects.filter(producto=product_instance).values_list('id_detalle', flat=True))
             existing_image_ids = list(Imagen.objects.filter(detalle__producto=product_instance).values_list('pk', flat=True))
             updated_detail_ids = []
@@ -153,7 +148,6 @@ class ProductUpdateAPIView(APIView):
             details_to_delete = set(existing_detail_ids) - set(updated_detail_ids)
             Detalle.objects.filter(pk__in=details_to_delete).delete()
         return Response({"message": "Product updated successfully"}, status=status.HTTP_200_OK)
-
 
 class ProductDeleteAPIView(APIView):
     permission_classes = [IsAdminUser]
