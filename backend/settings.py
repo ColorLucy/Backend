@@ -97,6 +97,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {"default": dj_database_url.config(default=os.environ.get("DATABASE_URL"))}
 # DATABASES = {"default": env.db("DATABASE_URL")}
 
+# Twilio
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_WHATSAPP_NUMBER = os.environ.get("TWILIO_WHATSAPP_NUMBER")
+TO_WHATSAPP_NUMBER = os.environ.get("TO_WHATSAPP_NUMBER")
+
 # Cloudinary Storage
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 

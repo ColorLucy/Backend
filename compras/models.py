@@ -34,10 +34,7 @@ class Pedido(models.Model):
 class ProductoPedido(models.Model):
     id_productos_pedido = models.AutoField(primary_key=True)
     pedido = models.ForeignKey(Pedido, related_name='productos' , on_delete=models.CASCADE)
-    # producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     detalle = models.ForeignKey(Detalle, on_delete=models.CASCADE)
-    # categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    # imagenes = models.ForeignKey(Imagen, on_delete=models.CASCADE, null=True, blank=True)
     cantidad = models.PositiveIntegerField()
 
     def save(self, *args, **kwargs):
@@ -48,4 +45,8 @@ class ProductoPedido(models.Model):
 
     def __str__(self):
         return self.id_productos_pedido
+    
+class Notification(models.Model):
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
     
