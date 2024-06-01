@@ -23,6 +23,8 @@ class Producto(models.Model):
     descripcion = models.TextField(null=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, db_column="id_categoria")
 
+    class Meta:
+        ordering = ['id_producto']
     def save(self, *args, **kwargs):
         if not self.id_producto:
             max_id = Producto.objects.aggregate(max_id=Max('id_producto'))['max_id']
