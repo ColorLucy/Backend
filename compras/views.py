@@ -77,3 +77,9 @@ class NotificationListView(APIView):
         notifications = Notification.objects.all()
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
+
+class PedidosClienteView(APIView):
+    def get(self, request):
+        pedidos_cliente = Pedido.objects.filter(user=request.id_cliente)
+        serializer_pedido = PedidoSerializer(pedidos_cliente, many=True)
+        return Response(serializer_pedido.data)
