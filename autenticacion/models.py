@@ -17,13 +17,13 @@ class UserManager(BaseUserManager):
 
 class UserData(AbstractUser):
     username = None
-    is_superuser = None
     name = models.CharField(max_length=100, default=None)
     email = models.EmailField(max_length=100, unique=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now_add=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
