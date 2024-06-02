@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime
+from pytz import timezone
 from .serializers import *
 User = get_user_model()
 
@@ -20,7 +21,7 @@ class UserLoginAPIView(APIView):
     def post(self, request, *args, **kargs):
         user = authenticate(email=request.data['email'], password=request.data['password'])
         if user is not None:
-            user.last_login = datetime.now()
+            user.last_login = datetime.now(timezone('America/Bogota'))
             user.save()
             refresh = RefreshToken.for_user(user)
             user = UserSerializer(instance=user)
@@ -94,7 +95,7 @@ class ExampleView(APIView):
 class GoogleLoginView(APIView):
     def post(self, request, *args, **kwargs):
         user, created = User.objects.get_or_create(email=request.data['email'], name=request.data['name'])
-        user.last_login = datetime.now()
+        user.last_login = datetime.now(timezone('America/Bogota'))
         user.save()
         refresh = RefreshToken.for_user(user)
         user = UserSerializer(instance=user)
