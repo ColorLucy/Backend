@@ -103,5 +103,4 @@ class GoogleLoginView(APIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
-        return Response(response, status=status.HTTP_201_CREATED) if created else Response(response,
-                                                                                           status=status.HTTP_200_OK)
+        return Response(response, status=status.HTTP_201_CREATED) if created else Response(response, status=status.HTTP_200_OK)
