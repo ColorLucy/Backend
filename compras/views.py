@@ -80,6 +80,7 @@ class NotificationListView(APIView):
 
 class PedidosClienteView(APIView):
     def get(self, request):
-        pedidos_cliente = Pedido.objects.filter(user=request.id_cliente)
+        client_id = request.query_params.get('client_id')
+        pedidos_cliente = Pedido.objects.filter(user=client_id)
         serializer_pedido = PedidoSerializer(pedidos_cliente, many=True)
-        return Response(serializer_pedido.data)
+        return Response(serializer_pedido.data, status=status.HTTP_200_OK)
