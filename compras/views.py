@@ -14,7 +14,6 @@ from twilio.base.exceptions import TwilioRestException
 
 logger = logging.getLogger(__name__)
 
-
 def enviar_notificacion_whatsapp(body):
     try:
         client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
@@ -91,3 +90,10 @@ class NotificationListView(APIView):
         notifications = Notification.objects.all()
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
+
+class PedidosClienteView(APIView):
+    def get(self, request):
+        client_id = request.query_params.get('client_id')
+        pedidos_cliente = Pedido.objects.filter(user=client_id)
+        serializer_pedido = PedidoSerializer(pedidos_cliente, many=True)
+        return Response(serializer_pedido.data, status=status.HTTP_200_OK)
