@@ -63,7 +63,7 @@ class PedidosAPIView(APIView):
 
 class NotificationListView(APIView):
     def get(self, request):
-        notifications = Notification.objects.all()
+        notifications = Notification.objects.all().order_by('-created_at')
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
 
