@@ -1,4 +1,3 @@
-# views.py
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
@@ -9,6 +8,8 @@ from twilio.rest import Client
 from django.conf import settings
 import logging
 from twilio.base.exceptions import TwilioRestException
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +26,12 @@ def enviar_notificacion_whatsapp(body):
         logger.error(f"Twilio error: {e}")
         return None
 
-
 class PedidoAPIView(APIView):
     def get(self, request, *args, **kwargs):
         pedido_id = kwargs.get("pedido_id")
         pedido = get_object_or_404(Pedido, pk=pedido_id)
         serializer = PedidoSerializer(pedido, many=False)
         return Response(serializer.data)
-
 
 class PedidosAPIView(APIView):
     def get(self, request):
@@ -44,24 +43,27 @@ class PedidosAPIView(APIView):
         serializer = PedidoSerializer(data=request.data)
         if serializer.is_valid():
             pedido = serializer.save()
-
             # Crear mensaje de notificación
             message = f"Se ha creado un nuevo pedido con ID: {pedido.id_pedido} del usuario: {pedido.user}"
             Notification.objects.create(message=message)
-
             # Enviar notificación por WhatsApp
             body = f"Has recibido un pedido nuevo. Detalles: https://colorlucycali.onrender.com/admin/orders/"
             enviar_notificacion_whatsapp(body)
-
+            # Enviar notificación al cliente
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                "pedidos",
+                {
+                    'type': 'pedido_message',
+                    'message': message
+                }
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class NotificationListView(APIView):
     def get(self, request):
-        notifications = Notification.objects.all()
+        notifications = Notification.objects.all().order_by('-created_at')
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
 
