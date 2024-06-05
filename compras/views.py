@@ -10,6 +10,7 @@ import logging
 from twilio.base.exceptions import TwilioRestException
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +36,11 @@ class PedidoAPIView(APIView):
 
 class PedidosAPIView(APIView):
     def get(self, request):
-        pedidos = Pedido.objects.all()
+        pedidos = Pedido.objects.all().order_by('-fecha_pedido')
         serializer = PedidoSerializer(pedidos, many=True)
         return Response(serializer.data)
-
+    
+    @transaction.atomic
     def post(self, request):
         serializer = PedidoSerializer(data=request.data)
         if serializer.is_valid():
@@ -47,7 +49,7 @@ class PedidosAPIView(APIView):
             message = f"Se ha creado un nuevo pedido con ID: {pedido.id_pedido} del usuario: {pedido.user}"
             Notification.objects.create(message=message)
             # Enviar notificación por WhatsApp
-            body = f"Has recibido un pedido nuevo. Detalles: https://colorlucycali.onrender.com/admin/orders/"
+            body = f"Has recibido un pedido nuevo. Detalles: https://colorlucycali.onrender.com/admin/order/view/{pedido.id_pedido}"
             enviar_notificacion_whatsapp(body)
             # Enviar notificación al cliente
             channel_layer = get_channel_layer()
@@ -58,7 +60,7 @@ class PedidosAPIView(APIView):
                     'message': message
                 }
             )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)      
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class NotificationListView(APIView):
