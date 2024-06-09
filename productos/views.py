@@ -134,3 +134,11 @@ class ProductSearchAPIView(APIView):
             return paginator.get_paginated_response(serializer.data)
         else:
             return Response("No se proporcionó un término de búsqueda", status=status.HTTP_400_BAD_REQUEST)
+
+
+class DetalleListAPIView(APIView):
+    def get(self, request):
+        detalles = Detalle.objects.all()
+        serializer = DetalleSerializer(detalles, many=True)
+        return Response(serializer.data)
+
