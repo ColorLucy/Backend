@@ -16,13 +16,23 @@ User = get_user_model()
 
 
 class UserGetAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, *args, **kwargs):
-        id = kwargs.get("id")
-        user = get_object_or_404(User, pk=id)
+        user = request.user
         serializer = UserGetSerializer(user, many=False)
         return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class UserLoginAPIView(APIView):
