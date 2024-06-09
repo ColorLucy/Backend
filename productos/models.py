@@ -41,6 +41,7 @@ class Detalle(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     unidad = models.CharField(max_length=50)
     color = models.CharField(max_length=50)
+    disponible = models.BooleanField(default=True)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, db_column="id_producto")
 
     def save(self, *args, **kwargs):

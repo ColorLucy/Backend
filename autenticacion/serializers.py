@@ -31,3 +31,19 @@ class UserGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserData
         fields = ["email", "name"]
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserData
+        fields = [
+            "id",
+            "email",
+            "name",
+            "password"]
+    def update(self, instance, validated_data):
+        instance.email = validated_data.get("email", instance.email)
+        instance.name = validated_data.get("name", instance.name)
+        password = validated_data.get("password", None)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
