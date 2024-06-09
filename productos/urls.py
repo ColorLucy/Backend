@@ -18,4 +18,7 @@ urlpatterns = [
     path("product-details/", ProductosDetalleAPIView.as_view(), name="view_products_details"),
     path("product-details/<int:producto_id>/", ProductoDetalleAPIView.as_view(), name="view_product_details"),
     path('detalles-por-categoria/<int:categoria_id>/', DetallesPorCategoriaAPIView.as_view(), name='detalles_por_categoria'),
+
+    path('detalles/', DetalleListAPIView.as_view(), name="detalles_list")
 ]
+

@@ -42,7 +42,7 @@ class DetalleProductoSerializer(ModelSerializer):
 
     class Meta:
         model = Detalle
-        fields = ['nombre', 'precio', 'unidad', 'color', 'producto', "imagenes"]
+        fields = ['nombre', 'precio', 'unidad', 'color', 'disponible', 'producto', "imagenes"]
 
 
 class ProductoDetalleImagenSerializer(serializers.ModelSerializer):
