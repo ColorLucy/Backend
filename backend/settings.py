@@ -46,7 +46,16 @@ INSTALLED_APPS = [
     "informacion",
     "autenticacion",
     'rest_framework_simplejwt',
+    'channels'
 ]
+
+ASGI_APPLICATION = "backend.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # implementar autenticación
 
