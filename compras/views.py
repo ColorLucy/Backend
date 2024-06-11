@@ -11,6 +11,8 @@ from twilio.base.exceptions import TwilioRestException
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.db import transaction
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +32,8 @@ def enviar_notificacion_whatsapp(body):
 
 
 class PedidoAPIView(APIView):
+    permission_classes = [IsAdminUser, IsAuthenticatedOrReadOnly]
+    authentication_classes = [JWTAuthentication]
     def get(self, request, *args, **kwargs):
         pedido_id = kwargs.get("pedido_id")
         pedido = get_object_or_404(Pedido, pk=pedido_id)
@@ -53,6 +57,8 @@ class PedidoAPIView(APIView):
 
 
 class PedidosAPIView(APIView):
+    permission_classes = [IsAdminUser, IsAuthenticatedOrReadOnly]
+    authentication_classes = [JWTAuthentication]
     def get(self, request):
         pedidos = Pedido.objects.all().order_by("-fecha_pedido")
         serializer = PedidoSerializer(pedidos, many=True)
